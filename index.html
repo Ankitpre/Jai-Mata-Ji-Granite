@@ -1,179 +1,264 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- HOME SCREEN ICON CODE (Fixes the boring G) -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="JMJ Calc">
-    
-    <!-- This links to the icon.png you upload to GitHub -->
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
-    
-    <link rel="manifest" href="data:application/manifest+json,{'name':'Jai Mata Ji Granite','short_name':'JMJ Calc','start_url':'.','display':'standalone','background_color':'#d32f2f','theme_color':'#d32f2f','icons':[{'src':'icon.png','sizes':'192x192','type':'image/png'}]}">
+import React, { useState } from "react";
 
-    <title>Jai Mata Ji Marble & Granite</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { 
-            background-color: #f9fafb; 
-            font-family: -apple-system, system-ui, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .header-bg {
-            background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 60%, #ef5350 100%);
-        }
-        /* Style for your centered logo */
-        .app-logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-        }
-    </style>
-</head>
-<body class="min-h-screen bg-gray-50 flex flex-col items-center pb-10">
+// --- CALCULATOR LOGIC (EXACTLY AS PROVIDED) ---
+function Calculator() {
+  const [graniteType, setGraniteType] = useState("South");
+  const [totalFeet, setTotalFeet] = useState("");
+  const [costPrice, setCostPrice] = useState("");
+  const [sellingPrice, setSellingPrice] = useState("");
+  const [result, setResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
 
-    <!-- New Header with Centered Logo -->
-    <div id="header" class="w-full py-10 px-4 flex flex-col items-center shadow-md header-bg pt-14 rounded-b-[40px]">
-        <div class="flex flex-col items-center gap-3">
-            <!-- This will display your icon.png as the main logo -->
-            <img src="icon.png" class="app-logo" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2603/2603741.png'">
-            
-            <div class="text-center">
-                <h1 class="text-white font-black text-3xl tracking-tighter italic uppercase leading-none">JAI MATA JI</h1>
-                <p class="text-red-100 text-[10px] font-bold tracking-[0.3em] uppercase mt-2">Marbles & Granite House</p>
+  const handleCalculate = () => {
+    setError("");
+    const feet = parseFloat(totalFeet);
+    const cost = parseFloat(costPrice);
+    const sell = parseFloat(sellingPrice);
+
+    if (isNaN(feet) || feet <= 0) {
+      setError("कुल फीट सही से भरें। / Please enter a valid Total Feet.");
+      return;
+    }
+    if (isNaN(cost) || cost <= 0) {
+      setError("खरीदी रेट सही से भरें। / Please enter a valid Cost Price.");
+      return;
+    }
+    if (isNaN(sell) || sell <= 0) {
+      setError("बिक्री रेट सही से भरें। / Please enter a valid Selling Price.");
+      return;
+    }
+
+    const factor = graniteType === "Rajasthan" ? 0.75 : 0.82;
+    const minSellingPrice = factor * cost;
+    const profitPerFoot = sell - minSellingPrice;
+    const totalProfit = feet * profitPerFoot;
+
+    setResult({ profitPerFoot, totalProfit, totalFeet: feet, graniteType, costPrice: cost, sellingPrice: sell, factor, minSellingPrice });
+  };
+
+  const handleShare = async () => {
+    if (!result) return;
+    const text = buildShareText(result);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const buildShareText = (r) => {
+    const status = r.totalProfit >= 0 ? "PROFIT (फायदा)" : "LOSS (नुकसान)";
+    return `🪨 Jai Mata Ji Marble & Granite House
+─────────────────────────
+पत्थर का प्रकार : ${r.graniteType}
+कुल फीट         : ${r.totalFeet} sq.ft.
+खरीदी रेट       : ₹${r.costPrice.toFixed(2)}
+बिक्री रेट      : ₹${r.sellingPrice.toFixed(2)}
+─────────────────────────
+Min. Sell Price  : ₹${r.minSellingPrice.toFixed(2)}
+Profit/Foot      : ₹${r.profitPerFoot.toFixed(2)}
+Total ${status}: ₹${Math.abs(r.totalProfit).toFixed(2)}
+─────────────────────────`;
+  };
+
+  const isProfit = result !== null && result.totalProfit >= 0;
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+      <div
+        className="w-full py-5 px-4 flex flex-col items-center shadow-md"
+        style={{ background: "linear-gradient(135deg, #b71c1c 0%, #d32f2f 60%, #ef5350 100%)" }}
+      >
+        <div className="flex items-center gap-3 mb-1">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center shadow-md border-2 border-white/30"
+            style={{ background: "#ff5252" }}
+          >
+            <span className="text-black font-black text-2xl leading-none" style={{ fontFamily: "Georgia, serif" }}>G</span>
+          </div>
+          <div className="text-center">
+            <h1 className="text-white font-bold text-xl leading-tight tracking-wide">JAI MATA JI</h1>
+            <p className="text-red-100 text-sm font-bold leading-tight">Marble &amp; Granite House</p>
+          </div>
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center shadow-md border-2 border-white/30"
+            style={{ background: "#ff5252" }}
+          >
+            <span className="text-black font-black text-2xl leading-none" style={{ fontFamily: "Georgia, serif" }}>G</span>
+          </div>
+        </div>
+        <div className="mt-2 bg-white/20 rounded-full px-4 py-1">
+          <p className="text-white text-xs font-semibold tracking-widest uppercase">Granite Profit Calculator</p>
+        </div>
+      </div>
+
+      <div className="w-full max-w-md px-4 mt-6 mb-10">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <div className="mb-5">
+            <label className="block font-bold text-gray-800 mb-1">Granite Type</label>
+            <p className="text-xs text-gray-500 mb-2">पत्थर का प्रकार चुनें</p>
+            <div className="flex gap-3">
+              {["South", "Rajasthan"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setGraniteType(type)}
+                  className={`flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition-all duration-200 ${
+                    graniteType === type
+                      ? "border-red-600 bg-red-600 text-white shadow-sm"
+                      : "border-gray-200 bg-gray-50 text-gray-600 hover:border-red-300 hover:bg-red-50"
+                  }`}
+                >
+                  {type}
+                  <span className="block text-xs font-normal opacity-80 mt-0.5">
+                    Factor: {type === "South" ? "0.82" : "0.75"}
+                  </span>
+                </button>
+              ))}
             </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block font-bold text-gray-800 mb-0.5">Total Feet</label>
+            <p className="text-xs text-gray-500 mb-1.5">कुल फीट (sq.ft.)</p>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">📐</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder="जैसे: 250"
+                value={totalFeet}
+                onChange={(e) => setTotalFeet(e.target.value)}
+                className="w-full pl-9 pr-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-red-500 focus:outline-none text-gray-800 font-medium text-base transition-colors bg-gray-50 focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block font-bold text-gray-800 mb-0.5">Cost Price (खरीदी रेट ₹)</label>
+            <p className="text-xs text-gray-500 mb-1.5">प्रति sq.ft. खरीदी कीमत</p>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">₹</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder="जैसे: 120"
+                value={costPrice}
+                onChange={(e) => setCostPrice(e.target.value)}
+                className="w-full pl-8 pr-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-red-500 focus:outline-none text-gray-800 font-medium text-base transition-colors bg-gray-50 focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className="block font-bold text-gray-800 mb-0.5">Selling Price (बिक्री रेट ₹)</label>
+            <p className="text-xs text-gray-500 mb-1.5">प्रति sq.ft. बिक्री कीमत</p>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">₹</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder="जैसे: 150"
+                value={sellingPrice}
+                onChange={(e) => setSellingPrice(e.target.value)}
+                className="w-full pl-8 pr-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-red-500 focus:outline-none text-gray-800 font-medium text-base transition-colors bg-gray-50 focus:bg-white"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
+              ⚠️ {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleCalculate}
+            className="w-full py-5 rounded-xl text-white font-black text-xl tracking-widest shadow-lg transition-all duration-200 active:scale-[0.97]"
+            style={{ background: "linear-gradient(135deg, #d32f2f, #b71c1c)" }}
+          >
+            CALCULATE
+          </button>
         </div>
-        
-        <div class="mt-5 bg-black/20 backdrop-blur-sm rounded-full px-6 py-1 border border-white/10">
-            <p class="text-white text-[9px] font-black tracking-widest uppercase">Premium Calculator</p>
-        </div>
+
+        {result && (
+          <>
+            <div
+              className="mt-5 rounded-2xl border-2 p-5 shadow-sm"
+              style={isProfit ? { background: "#f0fdf4", borderColor: "#16a34a" } : { background: "#fff1f2", borderColor: "#dc2626" }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-black text-lg" style={{ color: isProfit ? "#15803d" : "#b91c1c" }}>
+                  {isProfit ? "✅ फायदा (Profit)" : "❌ नुकसान (Loss)"}
+                </h2>
+                <span className="text-xs font-bold px-2 py-1 rounded-full"
+                  style={isProfit ? { background: "#dcfce7", color: "#15803d" } : { background: "#fee2e2", color: "#b91c1c" }}>
+                  {result.graniteType}
+                </span>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 font-medium text-sm">Profit per Foot</span>
+                  <span className="font-bold text-lg" style={{ color: isProfit ? "#15803d" : "#b91c1c" }}>
+                    ₹{result.profitPerFoot.toFixed(2)}
+                  </span>
+                </div>
+                <div className="border-t border-gray-300" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-gray-700 font-bold text-sm block">Total {isProfit ? "Profit" : "Loss"}</span>
+                    <span className="text-xs text-gray-400">{result.totalFeet} × ₹{result.profitPerFoot.toFixed(2)}</span>
+                  </div>
+                  <span className="font-black text-3xl" style={{ color: isProfit ? "#15803d" : "#b91c1c" }}>
+                    ₹{Math.abs(result.totalProfit).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-xs text-gray-400 mb-3">
+                  Formula: ₹{result.sellingPrice} − ({result.factor} × ₹{result.costPrice}) = ₹{result.profitPerFoot.toFixed(2)}/ft
+                </p>
+                <button
+                  onClick={handleShare}
+                  className="w-full py-3 rounded-xl border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm flex items-center justify-center gap-2"
+                >
+                  {copied ? <>✅ Copied!</> : <>📋 Share Quote / कोट शेयर करें</>}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border-2 p-4" style={{ background: "#fffbeb", borderColor: "#f59e0b" }}>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl mt-0.5">⚠️</span>
+                <div className="flex-1">
+                  <p className="font-black text-amber-900 text-sm uppercase tracking-wide mb-1">Minimum Selling Price</p>
+                  <p className="text-amber-800 text-xs font-semibold mb-2">इससे कम में न बेचें — Do NOT sell below this price</p>
+                  <div className="flex items-center justify-between bg-amber-100 rounded-xl px-4 py-3 border border-amber-300">
+                    <span className="text-amber-800 font-semibold text-sm">{result.factor} × ₹{result.costPrice} =</span>
+                    <span className="font-black text-2xl text-amber-900">₹{result.minSellingPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
+  );
+}
 
-    <!-- Main Calculator Interface -->
-    <div class="w-full max-w-md px-4 -mt-6">
-        <div class="bg-white rounded-[40px] shadow-xl p-7 border border-gray-100">
-            
-            <!-- Type Selector -->
-            <div class="mb-6 flex gap-3">
-                <button id="btnSouth" onclick="setGraniteType('South')" class="flex-1 py-4 rounded-2xl border-2 font-black text-sm transition-all border-red-600 bg-red-600 text-white">
-                    SOUTH<br><span class="text-[9px] font-normal opacity-80 uppercase">0.82 Factor</span>
-                </button>
-                <button id="btnRajasthan" onclick="setGraniteType('Rajasthan')" class="flex-1 py-4 rounded-2xl border-2 font-black text-sm transition-all border-gray-100 bg-gray-50 text-gray-400">
-                    RAJASTHAN<br><span class="text-[9px] font-normal opacity-80 uppercase">0.75 Factor</span>
-                </button>
-            </div>
+// --- APP ROUTER (EXACTLY AS PROVIDED) ---
+export default function App() {
+  return <Calculator />;
+}
 
-            <!-- Inputs -->
-            <div class="space-y-4">
-                <div class="bg-gray-50 p-4 rounded-2xl border-2 border-transparent focus-within:border-red-500 transition-all">
-                    <label class="block font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-1 text-center">Measurement (Sq.Ft.)</label>
-                    <input type="number" id="totalFeet" inputmode="decimal" placeholder="0" class="w-full bg-transparent text-2xl font-bold outline-none text-gray-800 text-center">
-                </div>
-                <div class="bg-gray-50 p-4 rounded-2xl border-2 border-transparent focus-within:border-red-500 transition-all">
-                    <label class="block font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-1 text-center">Cost Rate (खरीदी)</label>
-                    <input type="number" id="costPrice" inputmode="decimal" placeholder="0.00" class="w-full bg-transparent text-2xl font-bold outline-none text-gray-800 text-center">
-                </div>
-                <div class="bg-gray-50 p-4 rounded-2xl border-2 border-transparent focus-within:border-red-500 transition-all">
-                    <label class="block font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-1 text-center">Selling Rate (बिक्री)</label>
-                    <input type="number" id="sellingPrice" inputmode="decimal" placeholder="0.00" class="w-full bg-transparent text-2xl font-bold outline-none text-gray-800 text-center">
-                </div>
-            </div>
-
-            <button onclick="handleCalculate()" class="w-full mt-8 py-5 rounded-2xl text-white font-black text-xl tracking-widest shadow-lg active:scale-95 transition-all" style="background: linear-gradient(135deg, #d32f2f, #b71c1c)">
-                CALCULATE
-            </button>
-        </div>
-
-        <!-- Result Section -->
-        <div id="resultsArea" class="hidden mt-6 animate-in fade-in slide-in-from-bottom-4">
-            <div id="statusCard" class="rounded-[40px] border-4 p-8 bg-white shadow-sm">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 id="statusLabel" class="font-black italic text-2xl uppercase tracking-tighter"></h2>
-                    <span id="typeBadge" class="text-[9px] font-black px-4 py-1.5 rounded-full uppercase bg-black text-white"></span>
-                </div>
-                
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400 font-bold text-[10px] uppercase">Total Profit/Loss</span>
-                        <span id="resTotalProfit" class="font-black text-4xl tracking-tighter"></span>
-                    </div>
-                    <div class="border-t border-gray-100 pt-4">
-                        <div class="flex justify-between items-center bg-amber-50 rounded-2xl p-4 border border-amber-100">
-                            <span class="text-amber-800 font-bold text-[9px] uppercase">Min Selling Rate</span>
-                            <span id="resMinSellingPrice" class="text-xl font-black text-amber-900"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="handleShare()" class="w-full mt-8 py-4 rounded-2xl border-2 border-gray-100 bg-white text-gray-400 font-bold text-sm flex items-center justify-center gap-2">
-                    📋 Copy WhatsApp Quote
-                </button>
-            </div>
-        </div>
-
-        <!-- Professional Footer -->
-        <div class="mt-12 text-center opacity-30 px-10">
-            <p class="text-[8px] font-black uppercase tracking-[0.3em] leading-loose">
-                Kansana Kothi, Patri Road, Gwalior (M.P.)<br>
-                GSTIN: 23BHAPR7189B1ZD
-            </p>
-        </div>
-    </div>
-
-    <script>
-        let graniteType = "South";
-
-        function setGraniteType(type) {
-            graniteType = type;
-            const btnS = document.getElementById('btnSouth');
-            const btnR = document.getElementById('btnRajasthan');
-            if(type === 'South') {
-                btnS.className = "flex-1 py-4 rounded-2xl border-2 font-black text-sm transition-all border-red-600 bg-red-600 text-white";
-                btnR.className = "flex-1 py-4 rounded-2xl border-2 font-black text-sm transition-all border-gray-100 bg-gray-50 text-gray-400";
-            } else {
-                btnR.className = "flex-1 py-4 rounded-2xl border-2 font-black text-sm transition-all border-red-600 bg-red-600 text-white";
-                s.className = "flex-1 py-4 rounded-2xl border-2 font-black text-sm transition-all border-gray-100 bg-gray-50 text-gray-400";
-            }
-        }
-
-        function handleCalculate() {
-            const feet = parseFloat(document.getElementById('totalFeet').value) || 0;
-            const cost = parseFloat(document.getElementById('costPrice').value) || 0;
-            const sell = parseFloat(document.getElementById('sellingPrice').value) || 0;
-            const factor = graniteType === "Rajasthan" ? 0.75 : 0.82;
-            
-            const minSellingPrice = factor * cost;
-            const profitPerFoot = sell - minSellingPrice;
-            const totalProfit = feet * profitPerFoot;
-
-            document.getElementById('resultsArea').classList.remove('hidden');
-            const isProfit = totalProfit >= 0;
-            const card = document.getElementById('statusCard');
-            
-            card.style.borderColor = isProfit ? "#10b981" : "#ef4444";
-            document.getElementById('statusLabel').innerText = isProfit ? "Fayda (Profit)" : "Nuksan (Loss)";
-            document.getElementById('statusLabel').style.color = isProfit ? "#059669" : "#dc2626";
-            document.getElementById('resTotalProfit').innerText = "₹" + Math.abs(totalProfit).toLocaleString('en-IN', {maximumFractionDigits: 0});
-            document.getElementById('resTotalProfit').style.color = isProfit ? "#059669" : "#dc2626";
-            document.getElementById('resMinSellingPrice').innerText = "₹" + minSellingPrice.toFixed(2);
-            document.getElementById('typeBadge').innerText = graniteType;
-
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }
-
-        function handleShare() {
-            const ft = document.getElementById('totalFeet').value;
-            const total = document.getElementById('resTotalProfit').innerText;
-            const text = `*JAI MATA JI MARBLES*\n*Qty:* ${ft} sq.ft\n*Stone:* ${graniteType}\n*Total:* ${total}\n------------------\n_Sent via JMJ App_`;
-            navigator.clipboard.writeText(text).then(() => alert("Quote Copied!"));
-        }
-    </script>
-</body>
-</html>
-
-    
+                                
