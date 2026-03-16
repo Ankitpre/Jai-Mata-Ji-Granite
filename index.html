@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>JMJ Marble & Granite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --jmj-red: #d32f2f;
+            --jmj-gold: #f97316;
+        }
+        body { 
+            background-color: #f8fafc; 
+            font-family: -apple-system, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .header-gradient {
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+            padding-top: env(safe-area-inset-top, 20px);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .input-focus:focus-within {
+            border-color: var(--jmj-red);
+            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.1);
+        }
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+        }
+        .safe-badge { animation: pulse-gold 2s infinite; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <!-- Brand Header -->
+    <div class="header-gradient text-white pb-20 pt-8 px-6 text-center rounded-b-[40px] shadow-lg relative overflow-hidden">
+        <div class="relative z-10">
+            <h1 class="text-3xl font-black tracking-tighter uppercase italic">Jai Mata Ji</h1>
+            <p class="text-[10px] font-bold tracking-[0.3em] opacity-90">MARBLES & GRANITE HOUSE</p>
+            <div class="mt-3 inline-block bg-black/20 px-4 py-1 rounded-full border border-white/20">
+                <p class="text-[9px] font-mono">GSTIN: 23BHAPR7189B1ZD</p>
+            </div>
+        </div>
+        <!-- Decorative Circle -->
+        <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
+    </div>
+
+    <!-- Main Calculator -->
+    <div class="mx-5 -mt-12 relative z-20">
+        <div class="glass-card rounded-[32px] p-6 shadow-xl border border-white">
+            
+            <div class="flex gap-3 mb-8">
+                <button id="btnSouth" onclick="setType('South', 0.82)" class="flex-1 py-4 rounded-2xl border-2 transition-all font-bold text-sm bg-red-50 border-rose-600 text-rose-700">
+                    SOUTH<br><span class="text-[9px] font-normal opacity-60">Factor 0.82</span>
+                </button>
+                <button id="btnRajasthan" onclick="setType('Rajasthan', 0.75)" class="flex-1 py-4 rounded-2xl border-2 transition-all font-bold text-sm bg-white border-gray-100 text-gray-400">
+                    RAJASTHAN<br><span class="text-[9px] font-normal opacity-60">Factor 0.75</span>
+                </button>
+            </div>
+
+            <div class="space-y-5">
+                <div class="input-focus transition-all border-2 border-gray-100 rounded-2xl p-4 bg-gray-50/50">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Total Square Feet</label>
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3 opacity-40">📐</span>
+                        <input type="number" id="feet" class="w-full bg-transparent text-xl font-bold outline-none" placeholder="0" inputmode="decimal">
+                    </div>
+                </div>
+
+                <div class="input-focus transition-all border-2 border-gray-100 rounded-2xl p-4 bg-gray-50/50">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Cost Rate (खरीदी)</label>
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3 opacity-40">₹</span>
+                        <input type="number" id="cost" class="w-full bg-transparent text-xl font-bold outline-none" placeholder="0.00" inputmode="decimal">
+                    </div>
+                </div>
+
+                <div class="input-focus transition-all border-2 border-gray-100 rounded-2xl p-4 bg-gray-50/50">
+                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Selling Rate (बिक्री)</label>
+                    <div class="flex items-center">
+                        <span class="text-xl mr-3 opacity-40">💰</span>
+                        <input type="number" id="sell" class="w-full bg-transparent text-xl font-bold outline-none" placeholder="0.00" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculate()" class="w-full mt-8 bg-rose-600 text-white py-5 rounded-2xl font-black text-lg shadow-lg shadow-rose-200 active:scale-95 transition-transform uppercase tracking-widest">
+                Check Profit
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Area -->
+    <div id="results" class="hidden mx-5 mt-6 space-y-4">
+        <!-- Result Card -->
+        <div id="statusCard" class="p-6 rounded-[32px] border-2 bg-white shadow-sm transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="statusLabel" class="font-black italic text-xl"></h3>
+                <span id="typeLabel" class="text-[9px] font-black bg-gray-100 px-3 py-1 rounded-full uppercase"></span>
+            </div>
+            
+            <div class="flex justify-between items-center py-3 border-b border-gray-50">
+                <span class="text-gray-400 text-xs font-bold uppercase">Net Margin/Ft</span>
+                <span id="resPerFoot" class="text-xl font-bold italic text-gray-700"></span>
+            </div>
+
+            <div class="flex justify-between items-center pt-5">
+                <span class="text-gray-400 text-xs font-bold uppercase">Total Earnings</span>
+                <span id="resTotal" class="text-5xl font-black tracking-tighter"></span>
+            </div>
+        </div>
+
+        <!-- Safety Price -->
+        <div class="p-6 rounded-[32px] border-2 border-orange-100 bg-orange-50/30">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-lg">⚠️</div>
+                <div>
+                    <h4 class="text-orange-900 font-black text-xs uppercase">Minimum Safe Rate</h4>
+                    <p class="text-[9px] text-orange-700/60 font-bold uppercase">Do not sell below this</p>
+                </div>
+            </div>
+            <div class="flex justify-between items-end bg-white p-5 rounded-2xl border border-orange-100 shadow-sm">
+                <div class="text-[10px] font-mono text-gray-300" id="formulaText"></div>
+                <div class="text-3xl font-black text-orange-600 tracking-tighter" id="minRateText"></div>
+            </div>
+        </div>
+
+        <button onclick="copyToWhatsApp()" class="w-full py-5 bg-white border-2 border-gray-100 rounded-[32px] font-bold text-gray-400 flex items-center justify-center gap-2 active:bg-gray-50 transition-colors">
+            <span>💬</span> Share on WhatsApp
+        </button>
+    </div>
+
+    <div class="mt-10 px-8 text-center opacity-40">
+        <p class="text-[9px] font-black uppercase tracking-widest leading-loose">
+            Kansana Kothi, Patri Road, Gwalior (M.P.)<br>
+            9131843432 · 8875830046
+        </p>
+    </div>
+
+    <script>
+        let factor = 0.82;
+        let currentType = 'South';
+
+        function setType(type, f) {
+            factor = f;
+            currentType = type;
+            document.getElementById('btnSouth').className = type === 'South' ? 'flex-1 py-4 rounded-2xl border-2 transition-all font-bold text-sm bg-red-50 border-rose-600 text-rose-700' : 'flex-1 py-4 rounded-2xl border-2 transition-all font-bold text-sm bg-white border-gray-100 text-gray-400';
+            document.getElementById('btnRajasthan').className = type === 'Rajasthan' ? 'flex-1 py-4 rounded-2xl border-2 transition-all font-bold text-sm bg-red-50 border-rose-600 text-rose-700' : 'flex-1 py-4 rounded-2xl border-2 transition-all font-bold text-sm bg-white border-gray-100 text-gray-400';
+        }
+
+        function calculate() {
+            const feet = parseFloat(document.getElementById('feet').value) || 0;
+            const cost = parseFloat(document.getElementById('cost').value) || 0;
+            const sell = parseFloat(document.getElementById('sell').value) || 0;
+
+            const minPrice = factor * cost;
+            const profitPerFt = sell - minPrice;
+            const totalProfit = feet * profitPerFt;
+
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('typeLabel').innerText = currentType + " Granite";
+            document.getElementById('resPerFoot').innerText = "₹" + profitPerFt.toFixed(2);
+            document.getElementById('resTotal').innerText = "₹" + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('formulaText').innerText = factor + " × " + cost;
+            document.getElementById('minRateText').innerText = "₹" + minPrice.toFixed(2);
+
+            const card = document.getElementById('statusCard');
+            const label = document.getElementById('statusLabel');
+            const totalDisp = document.getElementById('resTotal');
+
+            if (totalProfit >= 0) {
+                card.style.borderColor = "#10b981";
+                label.innerText = "✓ PROFIT (फायदा)";
+                label.style.color = "#059669";
+                totalDisp.style.color = "#059669";
+            } else {
+                card.style.borderColor = "#ef4444";
+                label.innerText = "✕ LOSS (नुकसान)";
+                label.style.color = "#dc2626";
+                totalDisp.style.color = "#dc2626";
+            }
+
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyToWhatsApp() {
+            const text = `*JAI MATA JI MARBLE & GRANITE*\n--------------------------\n*Stone:* ${currentType}\n*Quantity:* ${document.getElementById('feet').value} ft\n*Profit:* ${document.getElementById('resTotal').innerText}\n--------------------------\n_Shop Calculator App_`;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert('Quote copied! Paste in WhatsApp.');
+        }
+    </script>
+</body>
+</html>
+
+            transition: all 0.2s ease; 
+        }
+        .input-box:focus-within { 
+            border-color: #d32f2f; 
+            background: white;
+            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.1);
+        }
+
+        .btn-calc { 
+            background: #d32f2f; 
+            color: white; 
+            padding: 20px; 
+            border-radius: 18px; 
+            width: 100%; 
+            font-weight: 800; 
+            font-size: 1.2rem; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(211, 47, 47, 0.3);
+            -webkit-appearance: none; /* iOS fix */
+        }
+        
+        .type-btn { 
+            border: 2px solid #f1f5f9; 
+            border-radius: 18px; 
+            padding: 16px; 
+            text-align: center; 
+            background: white; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .type-btn.active { 
+            border-color: #d32f2f; 
+            background: #fff5f5; 
+            color: #d32f2f; 
+            font-weight: bold; 
+            transform: scale(1.03);
+        }
+        
+        /* Shimmer effect for button */
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: shim 3s infinite;
+        }
+        @keyframes shim { 0% { left: -100%; } 100% { left: 100%; } }
+    </style>
+</head>
+<body class="pb-10">
+
+    <div class="stone stone-1"></div>
+    <div class="stone stone-2"></div>
+
+    <div class="red-gradient text-white pb-24 pt-12 px-6 text-center rounded-b-[60px] shadow-xl">
+        <h1 class="text-3xl font-black uppercase tracking-tight">Jai Mata Ji</h1>
+        <p class="text-[10px] opacity-80 uppercase tracking-[0.5em] font-bold mt-1">Marble & Granite House</p>
+    </div>
+
+    <div class="card -mt-16 mx-5 p-8 border border-white/50">
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div id="btnSouth" class="type-btn active" onclick="setType('South', 0.82)">
+                <div class="text-base font-black italic">SOUTH</div>
+                <div class="text-[9px] opacity-40 tracking-widest mt-1">0.82 FACTOR</div>
+            </div>
+            <div id="btnRajasthan" class="type-btn" onclick="setType('Rajasthan', 0.75)">
+                <div class="text-base font-black italic">RAJASTHAN</div>
+                <div class="text-[9px] opacity-40 tracking-widest mt-1">0.75 FACTOR</div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <label class="text-gray-400 font-black text-[10px] uppercase ml-1 mb-2 block tracking-widest">Total Feet (कुल फीट)</label>
+                <div class="input-box flex items-center px-5 py-4">
+                    <span class="text-xl mr-3">📐</span>
+                    <input type="number" id="feet" class="bg-transparent w-full outline-none text-xl font-bold" placeholder="0" inputmode="decimal">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-gray-400 font-black text-[10px] uppercase ml-1 mb-2 block tracking-widest">Cost Rate (खरीदी ₹)</label>
+                <div class="input-box flex items-center px-5 py-4">
+                    <span class="text-xl mr-3">📦</span>
+                    <input type="number" id="cost" class="bg-transparent w-full outline-none text-xl font-bold" placeholder="0.00" inputmode="decimal">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-gray-400 font-black text-[10px] uppercase ml-1 mb-2 block tracking-widest">Selling Rate (बिक्री ₹)</label>
+                <div class="input-box flex items-center px-5 py-4">
+                    <span class="text-xl mr-3">💰</span>
+                    <input type="number" id="sell" class="bg-transparent w-full outline-none text-xl font-bold" placeholder="0.00" inputmode="decimal">
+                </div>
+            </div>
+        </div>
+
+        <button onclick="calculate()" class="btn-calc shimmer mt-10 uppercase tracking-widest transition-transform active:scale-95">
+            Calculate Now
+        </button>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results" class="hidden mx-5 mt-8 space-y-5">
+        <div id="statusCard" class="p-8 border-2 bg-white rounded-[32px] shadow-sm transition-all duration-500">
+            <div class="flex justify-between items-center mb-8">
+                <span id="statusLabel" class="font-black text-2xl uppercase tracking-tighter"></span>
+                <span id="typeBadge" class="bg-black text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest"></span>
+            </div>
+            
+            <div class="flex justify-between items-center py-4 border-b border-gray-50">
+                <span class="text-gray-400 font-bold text-[10px] uppercase">Profit / Foot</span>
+                <span id="resPerFoot" class="text-xl font-bold italic"></span>
+            </div>
+            
+            <div class="flex justify-between items-center pt-6">
+                <span class="text-gray-400 font-bold text-[10px] uppercase">Total Profit</span>
+                <span id="resTotal" class="text-5xl font-black tracking-tighter"></span>
+            </div>
+        </div>
+
+        <!-- Safe Zone Card -->
+        <div class="p-7 border-2 border-orange-100 bg-orange-50/50 rounded-[32px] backdrop-blur-md">
+            <div class="flex items-center gap-2 mb-1 text-orange-800 font-black text-xs uppercase tracking-tight">
+                ⚠️ Safe Selling Price
+            </div>
+            <p class="text-[10px] text-orange-600 mb-5 font-bold italic opacity-60">Minimum Selling Rate (Isse neeche na bechen)</p>
+            <div class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-sm border border-orange-100">
+                <span id="minFormula" class="text-gray-300 font-mono text-[10px]"></span>
+                <span id="minPriceVal" class="text-3xl font-black text-orange-600 tracking-tighter"></span>
+            </div>
+        </div>
+
+        <button onclick="copyQuote()" class="w-full py-5 bg-white border-2 border-gray-100 rounded-[32px] font-bold text-gray-400 flex items-center justify-center gap-3 active:bg-gray-50 transition-colors">
+            <span class="text-lg">📋</span> Copy WhatsApp Quote
+        </button>
+    </div>
+
+    <div class="text-center mt-12 mb-10 opacity-30">
+        <p class="text-[9px] font-black uppercase tracking-[0.4em]">Gwalior Branch · JMJ Solutions</p>
+    </div>
+
+    <script>
+        let currentFactor = 0.82;
+        let currentType = 'South';
+
+        function setType(type, factor) {
+            currentType = type;
+            currentFactor = factor;
+            document.getElementById('btnSouth').className = type === 'South' ? 'type-btn active' : 'type-btn';
+            document.getElementById('btnRajasthan').className = type === 'Rajasthan' ? 'type-btn active' : 'type-btn';
+        }
+
+        function calculate() {
+            const feet = parseFloat(document.getElementById('feet').value) || 0;
+            const cost = parseFloat(document.getElementById('cost').value) || 0;
+            const sell = parseFloat(document.getElementById('sell').value) || 0;
+
+            const minPrice = currentFactor * cost;
+            const profitPerFt = sell - minPrice;
+            const totalProfit = feet * profitPerFt;
+
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('typeBadge').innerText = currentType;
+            document.getElementById('resPerFoot').innerText = '₹' + profitPerFt.toFixed(2);
+            document.getElementById('resTotal').innerText = '₹' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('minFormula').innerText = `${currentFactor} × ${cost}`;
+            document.getElementById('minPriceVal').innerText = '₹' + minPrice.toFixed(2);
+
+            const statusCard = document.getElementById('statusCard');
+            const statusLabel = document.getElementById('statusLabel');
+            const resTotal = document.getElementById('resTotal');
+            
+            if(totalProfit >= 0) {
+                statusCard.style.borderColor = '#16a34a';
+                statusLabel.innerText = "Profit (फायदा)";
+                statusLabel.style.color = '#16a34a';
+                resTotal.style.color = '#16a34a';
+            } else {
+                statusCard.style.borderColor = '#dc2626';
+                statusLabel.innerText = "Loss (नुकसान)";
+                statusLabel.style.color = '#dc2626';
+                resTotal.style.color = '#dc2626';
+            }
+            
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function copyQuote() {
+            const feet = document.getElementById('feet').value;
+            const total = document.getElementById('resTotal').innerText;
+            const text = `*JAI MATA JI MARBLE & GRANITE*\n--------------------------\n*Stone:* ${currentType}\n*Total:* ${feet} ft\n*Profit:* ${total}\n--------------------------\n_Shop Calculator_`;
+            
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            alert('Quote copied! Open WhatsApp to send.');
+        }
+    </script>
+</body>
+</html>
+
+  
