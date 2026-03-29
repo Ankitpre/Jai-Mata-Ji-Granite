@@ -66,11 +66,11 @@
                 <div class="flex gap-4">
                     <button id="btnSouth" onclick="setType('South')" class="flex-1 py-4 px-4 rounded-2xl border-2 font-black text-lg transition-all duration-200 border-red-600 bg-red-600 text-white shadow-md">
                         South
-                        <span class="block text-xs font-normal opacity-90">Factor: 0.82</span>
+                        <span class="block text-xs font-normal opacity-90">Factor: 17% /span>
                     </button>
                     <button id="btnRaj" onclick="setType('Rajasthan')" class="flex-1 py-4 px-4 rounded-2xl border-2 font-black text-lg transition-all duration-200 border-gray-200 bg-gray-50 text-gray-600">
                         Rajasthan
-                        <span class="block text-xs font-normal opacity-70">Factor: 0.75</span>
+                        <span class="block text-xs font-normal opacity-70">Factor: 21% </span>
                     </button>
                 </div>
             </div>
@@ -180,7 +180,7 @@
                 return;
             }
 
-            const factor = graniteType === "Rajasthan" ? 0.75 : 0.82;
+            const factor = graniteType === "Rajasthan" ? 0.79 : 0.83;
             const minSellingPrice = factor * cost;
             const profitPerFoot = sell - minSellingPrice;
             const totalProfit = feet * profitPerFoot;
